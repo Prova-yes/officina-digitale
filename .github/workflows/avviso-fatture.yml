@@ -1,0 +1,30 @@
+name: Avviso fatture
+
+# Quando una proposta di modifica tocca il calcolo delle fatture o i suoi test,
+# questo workflow lascia un commento che ricorda di avvisare l'amministrazione.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "src/fatture.js"
+      - "test/**"
+
+permissions:
+  pull-requests: write
+
+jobs:
+  avvisa:
+    name: Avvisa che si tocca la fatturazione
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scrivi il commento nella pull request
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "⚠️ Questa modifica tocca il calcolo delle fatture: va avvisato chi si occupa di amministrazione prima del merge."
+            });
